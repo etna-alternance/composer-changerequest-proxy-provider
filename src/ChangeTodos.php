@@ -16,7 +16,7 @@ class ChangeTodos implements \JsonSerializable
     /* @var array $datas */
     private $datas;
 
-    /* @var integer $request_type */
+    /* @var string $request_type */
     private $request_type;
 
     /* @var integer $user_request_id */
