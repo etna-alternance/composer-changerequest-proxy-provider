@@ -42,6 +42,25 @@ class ChangeRequestManager
         return $response;
     }
 
+    public function findByQueryStringAndAgg($query, $aggs, $from = 0, $size = 999999, $sort = "")
+    {
+        $query = urlencode($query);
+        $body  = ["aggs" => $aggs];
+
+        $response = $this->fireRequest("GET", "/search?q={$query}&from={$from}&size={$size}&sort={$sort}", $body);
+
+        $response["hits"] = array_map(
+            function ($hit) {
+                $change_todos = new ChangeTodos();
+                $change_todos->fromArray($hit);
+                return $change_todos;
+            },
+            $response["hits"]
+        );
+
+        return $response;
+    }
+
     public function findOneByQueryString($query)
     {
         $matching = $this->findByQueryString($query, 0, 1);
