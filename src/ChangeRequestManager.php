@@ -24,7 +24,26 @@ class ChangeRequestManager
         $this->app = $app;
     }
 
-    public function findByQueryString($query, $from = 0, $size = 99999, $sort = "", $aggs = [])
+    public function findByQueryString($query, $from = 0, $size = 99999, $sort = "")
+    {
+        $query = urlencode($query);
+
+        $response = $this->fireRequest("GET", "/search?q={$query}&from={$from}&size={$size}&sort={$sort}");
+        
+        $response["hits"] = array_map(
+            function ($hit) {
+                $change_todos = new ChangeTodos();
+                $change_todos->fromArray($hit);
+
+                return $change_todos;
+            },
+            $response["hits"]
+        );
+
+        return $response;
+    }
+
+    public function findByQueryStringAndAggs($query, $from = 0, $size = 99999, $sort = "", $aggs = [])
     {
         $query = urlencode($query);
         $body  = [];
@@ -33,8 +52,7 @@ class ChangeRequestManager
             $body  = ["aggs" => $aggs];
         }
 
-        $response = $this->fireRequest("GET", "/search?q={$query}&from={$from}&size={$size}&sort={$sort}", $body);
-
+        $response = $this->fireRequest("POST", "/aggs?q={$query}&from={$from}&size={$size}&sort={$sort}", $body);
         $response["hits"]["hits"] = array_map(
             function ($hit) {
                 $change_todos = new ChangeTodos();
@@ -51,11 +69,11 @@ class ChangeRequestManager
     {
         $matching = $this->findByQueryString($query, 0, 1);
 
-        if (0 === count($matching["hits"]["hits"])) {
+        if (0 === count($matching["hits"])) {
             return null;
         }
 
-        $change_request = $matching["hits"]["hits"][0];
+        $change_request = $matching["hits"][0];
 
         return $change_request;
     }
