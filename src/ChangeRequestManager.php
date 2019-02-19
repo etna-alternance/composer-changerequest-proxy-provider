@@ -29,7 +29,7 @@ class ChangeRequestManager
         $query = urlencode($query);
 
         $response = $this->fireRequest("GET", "/search?q={$query}&from={$from}&size={$size}&sort={$sort}");
-        
+
         $response["hits"] = array_map(
             function ($hit) {
                 $change_todos = new ChangeTodos();
