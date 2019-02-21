@@ -53,10 +53,12 @@ class ChangeRequestManager
         }
 
         $response = $this->fireRequest("POST", "/aggs?q={$query}&from={$from}&size={$size}&sort={$sort}", $body);
+
         $response["hits"]["hits"] = array_map(
             function ($hit) {
                 $change_todos = new ChangeTodos();
                 $change_todos->fromArray($hit);
+
                 return $change_todos;
             },
             $response["hits"]["hits"]
