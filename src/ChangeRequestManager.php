@@ -34,9 +34,34 @@ class ChangeRequestManager
             function ($hit) {
                 $change_todos = new ChangeTodos();
                 $change_todos->fromArray($hit);
+
                 return $change_todos;
             },
             $response["hits"]
+        );
+
+        return $response;
+    }
+
+    public function findByQueryStringAndAggs($query, $from = 0, $size = 99999, $sort = "", $aggs = [])
+    {
+        $query = urlencode($query);
+        $body  = [];
+
+        if (!empty($aggs)) {
+            $body  = ["aggs" => $aggs];
+        }
+
+        $response = $this->fireRequest("POST", "/aggs?q={$query}&from={$from}&size={$size}&sort={$sort}", $body);
+
+        $response["hits"]["hits"] = array_map(
+            function ($hit) {
+                $change_todos = new ChangeTodos();
+                $change_todos->fromArray($hit);
+
+                return $change_todos;
+            },
+            $response["hits"]["hits"]
         );
 
         return $response;
